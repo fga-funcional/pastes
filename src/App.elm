@@ -60,9 +60,10 @@ view : Model -> Html Msg
 view m =
     div []
         [ h1 [] [ text "Pêistebin" ]
-        , textarea [ placeholder "Escreva seu código aqui", onInput Current, rows 20, cols 100 ] []
+        , textarea [ placeholder "Escreva seu código aqui", onInput Current, rows 20, cols 100, value m.current ] []
         , inputElem m
-        , button [] [ text "Criar pêiste" ]
+        , button [ onClick Add ] [ text "Criar pêiste" ]
+        , showCodes m.codes
         ]
 
 
@@ -73,3 +74,11 @@ inputElem m =
         , value m.current
         ]
         []
+
+
+showCodes m =
+    ul [] (List.map showCode m)
+
+
+showCode st =
+    li [] [ text st ]
