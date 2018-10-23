@@ -19,12 +19,12 @@ main =
 
 
 type alias Model =
-    String
+    { codes : List String, current : String }
 
 
 init : Model
 init =
-    "Elm"
+    { codes = [], current = "" }
 
 
 
@@ -33,29 +33,23 @@ init =
 
 type Msg
     = Clear
-    | Concat String
-    | Prepend String
-    | Replace String
-    | NoOp
+    | Add
+    | Current String
 
 
 update : Msg -> Model -> Model
 update msg m =
     case msg of
         Clear ->
-            ""
+            { m | current = "" }
 
-        Concat st ->
-            m ++ " " ++ st
+        Add ->
+            { codes = m.current :: m.codes
+            , current = ""
+            }
 
-        Prepend st ->
-            st ++ " " ++ m
-
-        Replace st ->
-            st
-
-        NoOp ->
-            m
+        Current st ->
+            { m | current = st }
 
 
 
@@ -65,10 +59,17 @@ update msg m =
 view : Model -> Html Msg
 view m =
     div []
-        [ h1 [] [ text m ]
-        , input [ placeholder "Type here", onInput Replace ] []
-        , button [ onClick (Concat "hey!") ] [ text "hey" ]
-        , button [ onClick (Prepend "ho!") ] [ text "ho" ]
-        , button [ onClick (Concat "lets go!") ] [ text "lets go" ]
-        , button [ onClick Clear ] [ text "clear" ]
+        [ h1 [] [ text "Pêistebin" ]
+        , textarea [ placeholder "Escreva seu código aqui", onInput Current, rows 20, cols 100 ] []
+        , inputElem m
+        , button [] [ text "Criar pêiste" ]
         ]
+
+
+inputElem m =
+    input
+        [ placeholder "Nome do pêiste"
+        , onInput Current
+        , value m.current
+        ]
+        []
