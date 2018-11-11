@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+
 
 import Web.Scotty
 
@@ -7,12 +9,25 @@ import qualified Data.Map.Strict as M
 import Network.HTTP.Types
 import Control.Monad.IO.Class
 import Network.Wai.Middleware.Cors
+import GHC.Generics
+import Data.Aeson (FromJSON, ToJSON)
+instance ToJSON CCode 
+instance FromJSON CCode
 
 
 type Name = String
 
 type Code = String
 
+data CCode = CCode
+  { codename :: String,
+    lines :: [String]
+  } deriving (Show, Generic)
+
+allcodes = 
+  [ CCode "factorial" [ "def fat(n):" , "if n == 1:" , "return 1" , "return n * fat(n - 1)" ]
+    ,CCode "hello world" [ "print(hello world)" ]
+  ] 
 allCodes :: M.Map Name [Code]
 allCodes = M.fromList
     [ ("factorial",
@@ -39,11 +54,9 @@ main = do
         middleware simpleCors
 
         -- Retorna todas as tarefas.
-        --     middleware simpleCors
-
         get "/codes" $ do
-            codes <- liftIO $ readMVar codes'
-            json codes
+            -- codes <- liftIO $ readMVar codes'
+            json allcodes
 
         -- Recupera as tarefas de um dia.
         -- Ex: GET /codes/2018-01-01
