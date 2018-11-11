@@ -27,7 +27,7 @@ init _ =
       , savedText = "" 
       , currentText = "" 
       }
-    , Cmd.none
+    , Http.send  DataReceived getCodes
     )
 type alias Model =
     { codes: List String
@@ -40,10 +40,6 @@ view model =
         [ textarea [ onKeyDown KeyDown, onInput Input, value model.currentText, class "text-editor" ] []
         , button [ onClick Add ] [ text "Add" ]
         , renderList model.codes
-        , button [ onClick SendHttpRequest ]
-            [ text "Get data from server" ]
-        
-
         ]
 
 renderList lst =
@@ -111,6 +107,9 @@ codesDecoder =
 httpCommand : Cmd Msg
 httpCommand =
     codesDecoder
-        |> Http.get "http://localhost:3000/codes"
+        |> Http.get "http://localhost:3000/codes/factorial"
         |> Http.send DataReceived
 
+getCodes : Http.Request (List String)
+getCodes = 
+  Http.get "http://localhost:3000/codes/factorial" codesDecoder
