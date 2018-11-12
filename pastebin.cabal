@@ -13,4 +13,6 @@ executable          pastebin
                   , containers
                   , http-types
                   , wai-cors
+                  , aeson
+
 
