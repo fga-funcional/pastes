@@ -22,9 +22,31 @@ type alias Code =
    lines: List String
   }
 
+setCodeName : String -> Code -> Code
+setCodeName newName code = 
+  { code | codename = newName}
+
+setCodeLines : List String -> Code -> Code
+setCodeLines newLines code = 
+  { code | lines = newLines}
+
+setCurrentCode: Code -> Model -> Model
+setCurrentCode newCode model =
+    { model | currentCode = newCode}
+
+flip : (a -> b -> c) -> b -> a -> c
+flip f b a =
+  f a b
+
+asCurrentCodeIn : Model -> Code -> Model
+asCurrentCodeIn =
+    flip setCurrentCode
+
+
+
 type alias Model =
     { savedCodes: Array.Array Code 
-    , newCode: List String
+    , currentCode: Code 
     , name: String
     , savedText: String
     , currentText: String
@@ -32,7 +54,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model (Array.fromList []) [] "" "" "" 
+    ( Model (Array.fromList []) {codename="", lines=[]} "" "" "" 
     , Http.send  GetSavedCodes getCodes
     )
 
@@ -100,11 +122,19 @@ update msg model =
       ({ model | name = text , savedText = text}, Cmd.none)
 
     Add ->
-        ({ model | newCode = model.name ::   (String.split "\n" model.currentText), currentText = ""
+          let
+              newModel =
+                  model.currentCode
+                      |> setCodeName model.name 
+                      |> setCodeLines (String.split "\n" model.currentText)
+                      |> asCurrentCodeIn model 
+          in
+              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes}, Cmd.none)
+        {-
+        ({ model | newCode.name = name, newCode.lines = (String.split "\n" model.currentText), currentText = ""
         }, Cmd.none)
 
 
-        {-
     SendHttpRequest ->
         ( model, httpCommand )
     DataReceived (Ok savedCodes) ->
