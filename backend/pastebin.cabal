@@ -14,5 +14,4 @@ executable          pastebin
                   , http-types
                   , wai-cors
                   , aeson
-
-
+                  , mongoDB

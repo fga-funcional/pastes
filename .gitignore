@@ -1,4 +1,7 @@
+# Frontend
 # elm-package generated files
 elm-stuff
 # elm-repl generated files
 repl-temp-*
+# Backend
+backend/.stack-work/
