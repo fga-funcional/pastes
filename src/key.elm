@@ -6,6 +6,7 @@ import Array
 
 import Html.Events exposing (..)
 import Json.Decode as Json
+import Json.Encode as Encode exposing (..)
 import Json.Decode exposing (string, list, decodeString, Decoder)
 
 
@@ -97,6 +98,8 @@ type Msg
   | Input String
   | InputName String
   | Add
+  | CodeCreated (Result Http.Error Code)
+
   --| SendHttpRequest
   | GetSavedCodes (Result Http.Error (Array.Array Code))
   --| DataReceived (Result Http.Error (List String))
@@ -129,7 +132,7 @@ update msg model =
                       |> setCodeLines (String.split "\n" model.currentText)
                       |> asCurrentCodeIn model 
           in
-              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes}, Cmd.none)
+              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, createCodeCommand model.currentCode)
         {-
         ({ model | newCode.name = name, newCode.lines = (String.split "\n" model.currentText), currentText = ""
         }, Cmd.none)
@@ -155,6 +158,21 @@ update msg model =
             Ok codes->
                 ( { model | savedCodes = codes }, Cmd.none )
 
+    CodeCreated (Ok code) ->
+            ({ model | savedCodes = addNewCode code model.savedCodes, currentCode = Array.fromList [] 
+              }, Cmd.none )
+    CodeCreated (Err _) ->
+      (model, Cmd.none)
+
+addNewCode : Code -> (Array.Array Code) -> (Array.Array Code)
+addNewCode newCode codes =
+    let
+        appendCode : (Array.Array Code) -> (Array.Array Code)
+        appendCode listOfCodes =
+            Array.append listOfCodes [ newCode]
+    in
+        Array.map appendCode codes 
+
 inputElem m =
     input
         [ placeholder "Nome do pêiste"
@@ -171,6 +189,33 @@ codeDecoder =
             (Json.field "lines" (Json.list Json.string))
     )
 
+createCodeCommand : Code -> Cmd Msg
+createCodeCommand code =
+  let
+      url = "http://localhost:3000/codes/" 
+      body = codeEncoder code
+      request = Http.post url body string
+  in
+     Http.send CodeCreated request
+
+codeEncoder : Code -> Http.Body 
+codeEncoder code =
+   Http.jsonBody
+   <| Encode.object
+        [ ( "codename", Encode.string code.codename)
+        , ( "lines", (Encode.list Encode.string) code.lines)
+        ]
+createCodeRequest : Code -> Http.Request Code 
+createCodeRequest code =
+    Http.request
+        { method = "POST"
+        , headers = []
+        , url = "http://localhost:3000/posts/" ++ code.codename
+        , body = Http.jsonBody (codeEncoder code)
+        , expect = Http.expectJson codeDecoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 codesDecoder : Decoder (List String)
 codesDecoder =
@@ -185,3 +230,4 @@ httpCommand =
 getCodes : Http.Request (Array.Array Code)
 getCodes = 
   Http.get "http://localhost:3000/codes" codeDecoder
+
