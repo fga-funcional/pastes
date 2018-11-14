@@ -23,6 +23,8 @@ type alias Code =
    lines: List String
   }
 
+emptyCode : Code
+emptyCode = Code "" []
 setCodeName : String -> Code -> Code
 setCodeName newName code = 
   { code | codename = newName}
@@ -82,11 +84,6 @@ renderList lst =
     ul []
         (List.map (\l -> li [] [ text l ]) lst)
 
-showTodos m =
-    ul [] (List.map showTodo m)
-
-showTodo st =
-    li [] [ text st ]
 
 onKeyDown : (Int -> msg) -> Attribute msg
 onKeyDown tagger =
@@ -99,6 +96,7 @@ type Msg
   | InputName String
   | Add
   | CodeCreated (Result Http.Error Code)
+  | CreateNewCode
 
   --| SendHttpRequest
   | GetSavedCodes (Result Http.Error (Array.Array Code))
@@ -132,24 +130,8 @@ update msg model =
                       |> setCodeLines (String.split "\n" model.currentText)
                       |> asCurrentCodeIn model 
           in
-              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, createCodeCommand model.currentCode)
-        {-
-        ({ model | newCode.name = name, newCode.lines = (String.split "\n" model.currentText), currentText = ""
-        }, Cmd.none)
+              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, createCodeCommand newModel.currentCode)
 
-
-    SendHttpRequest ->
-        ( model, httpCommand )
-    DataReceived (Ok savedCodes) ->
-        ( {model | savedCodes = savedCodes}, Cmd.none )
-
-    DataReceived (Err httpError) ->
-            ( { model
-                | savedText = "erro" 
-              }
-            , Cmd.none
-            )
-            -}
     GetSavedCodes result ->
         case result of
             Err httpError ->
@@ -159,11 +141,15 @@ update msg model =
                 ( { model | savedCodes = codes }, Cmd.none )
 
     CodeCreated (Ok code) ->
-            ({ model | savedCodes = addNewCode code model.savedCodes, currentCode = Array.fromList [] 
+            ({ model | savedCodes = Array.push model.currentCode model.savedCodes, currentCode =emptyCode 
               }, Cmd.none )
+
     CodeCreated (Err _) ->
       (model, Cmd.none)
 
+    CreateNewCode ->
+      ( model, createCodeCommand model.currentCode )
+{-
 addNewCode : Code -> (Array.Array Code) -> (Array.Array Code)
 addNewCode newCode codes =
     let
@@ -172,6 +158,7 @@ addNewCode newCode codes =
             Array.append listOfCodes [ newCode]
     in
         Array.map appendCode codes 
+-}
 
 inputElem m =
     input
@@ -181,53 +168,58 @@ inputElem m =
         ]
         []
 
-codeDecoder: Json.Decoder (Array.Array Code)
-codeDecoder =
+codesDecoder: Json.Decoder (Array.Array Code)
+codesDecoder =
     Json.array (
         Json.map2 Code 
             (Json.field "codename" Json.string)
             (Json.field "lines" (Json.list Json.string))
     )
 
+codeDecoder: Json.Decoder Code
+codeDecoder =
+        Json.map2 Code 
+            (Json.field "codename" Json.string)
+            (Json.field "lines" (Json.list Json.string))
+
 createCodeCommand : Code -> Cmd Msg
 createCodeCommand code =
-  let
-      url = "http://localhost:3000/codes/" 
-      body = codeEncoder code
-      request = Http.post url body string
-  in
-     Http.send CodeCreated request
+      createCodeRequest code 
+        |> Http.send CodeCreated
 
-codeEncoder : Code -> Http.Body 
+codeEncoder : Code -> Encode.Value       
 codeEncoder code =
-   Http.jsonBody
-   <| Encode.object
+   Encode.object
         [ ( "codename", Encode.string code.codename)
         , ( "lines", (Encode.list Encode.string) code.lines)
         ]
+
 createCodeRequest : Code -> Http.Request Code 
 createCodeRequest code =
     Http.request
         { method = "POST"
-        , headers = []
-        , url = "http://localhost:3000/posts/" ++ code.codename
+        , headers = [
+          (Http.header "Origin" "http://localhost:8000")
+        , (Http.header "Access-Control-Request-Headers" "X-Custom-Header")
+        , (Http.header "Access-Control-Request-Method" "POST")
+        , (Http.header "Access-Control-Allow-Origin" "*")
+        ]
+        , url = "http://localhost:3000/codes/" ++ code.codename
         , body = Http.jsonBody (codeEncoder code)
         , expect = Http.expectJson codeDecoder
         , timeout = Nothing
-        , withCredentials = False
+        , withCredentials = True 
         }
-
-codesDecoder : Decoder (List String)
-codesDecoder =
-    list string
 {-
-httpCommand : Cmd Msg
-httpCommand =
-    codesDecoder
-        |> Http.get "http://localhost:3000/codes/factorial"
-        |> Http.send DataReceived
+createCodeRequest : Code-> Http.Request Code 
+createCodeRequest code =
+    Http.post (createPostUrl code.codename) (Http.jsonBody (codeEncoder code)) codeDecoder
 -}
+createPostUrl : String -> String
+createPostUrl codeName =
+    "http://localhost:3000/code/" ++ codeName
+
 getCodes : Http.Request (Array.Array Code)
 getCodes = 
-  Http.get "http://localhost:3000/codes" codeDecoder
+  Http.get "http://localhost:3000/codes" codesDecoder
 
