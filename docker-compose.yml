@@ -1,11 +1,20 @@
 version: '2' 
 
 services:
+  pastebin:
+    build:
+      context: ./frontend
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./:/pastebin
+    ports:
+      - 8000:8000
+
   pastebin_api:
     build:
       context: ./backend
       dockerfile: ./docker/Dockerfile
     volumes:
-      - ./:/pastebin_api
+      - ./backend/:/pastebin_api/
     ports:
       - 3000:3000

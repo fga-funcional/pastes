@@ -129,7 +129,7 @@ update msg model =
                       |> setCodeLines (String.split "\n" model.currentText)
                       |> asCurrentCodeIn model 
           in
-              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes}, Cmd.none)
+              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, Cmd.none)
         {-
         ({ model | newCode.name = name, newCode.lines = (String.split "\n" model.currentText), currentText = ""
         }, Cmd.none)

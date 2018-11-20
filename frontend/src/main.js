@@ -5983,6 +5983,8 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
+							currentText: '',
+							name: '',
 							savedCodes: A2(elm$core$Array$push, newModel.currentCode, model.savedCodes)
 						}),
 					elm$core$Platform$Cmd$none);
