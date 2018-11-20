@@ -1,1 +1,1 @@
-echo "main" | stack ghci --install-ghc --allow-different-user
+echo "main" | stack ghci --allow-different-user
