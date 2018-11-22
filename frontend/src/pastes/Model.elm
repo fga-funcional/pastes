@@ -19,8 +19,6 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd msg )
-init _ =
-    ( Model (Array.fromList []) {codename="", lines=[]} "" "" ""
-    , Http.send  GetSavedCodes getCodes
-    )
+init : Model
+init =
+    ( Model (Array.fromList []) {codename="", lines=[]} "" "" "")

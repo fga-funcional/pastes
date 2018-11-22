@@ -1,9 +1,34 @@
-module Msg exposing (Msg(..), update)
+module Msg exposing (..)
 
 import Model exposing (..)
 
 import Http exposing (..)
-import Array exposing (..)
+import Array
+import Json.Decode as Json
+import Html.Attributes exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+
+setCodeName : String -> Code -> Code
+setCodeName newName code = 
+  { code | codename = newName}
+
+setCodeLines : List String -> Code -> Code
+setCodeLines newLines code = 
+  { code | lines = newLines}
+
+setCurrentCode: Code -> Model -> Model
+setCurrentCode newCode model =
+    { model | currentCode = newCode}
+
+flip : (a -> b -> c) -> b -> a -> c
+flip f b a =
+  f a b
+
+asCurrentCodeIn : Model -> Code -> Model
+asCurrentCodeIn =
+    flip setCurrentCode
 
 type Msg 
   = NoOp
@@ -89,9 +114,9 @@ codeDecoder =
     )
 
 
-codesDecoder : Decoder (List String)
+codesDecoder : Json.Decoder (List String)
 codesDecoder =
-    list string
+    Json.list Json.string
 {-
 httpCommand : Cmd Msg
 httpCommand =
@@ -103,3 +128,5 @@ getCodes : Http.Request (Array.Array Code)
 getCodes =
   Http.get "http://localhost:3000/codes" codeDecoder
 
+init : () -> (Model, Cmd Msg) 
+init _ = (Model.init, Http.send GetSavedCodes getCodes) 
