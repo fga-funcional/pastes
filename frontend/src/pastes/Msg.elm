@@ -14,6 +14,9 @@ setCodeName : String -> Code -> Code
 setCodeName newName code = 
   { code | codename = newName}
 
+setCodeSyntax : String -> Code -> Code
+setCodeSyntax newSyntax code = 
+  { code | syntax = newSyntax }
 setCodeLines : List String -> Code -> Code
 setCodeLines newLines code = 
   { code | lines = newLines}
@@ -35,6 +38,7 @@ type Msg
   | KeyDown Int 
   | Input String
   | InputName String
+  | InputCode String
   | Add 
   | GetSavedCodes (Result Http.Error (Array.Array Code))
 
@@ -82,10 +86,14 @@ update msg model =
     InputName text ->
       validate ({ model | name = text , savedText = text}, Cmd.none)
 
+    InputCode text ->
+      validate ({ model | currentSyntax = text }, Cmd.none)
+
     Add ->
           let
               newModel =
                   model.currentCode
+                      |> setCodeSyntax model.currentSyntax
                       |> setCodeName model.name
                       |> setCodeLines (String.split "\n" model.currentText)
                       |> asCurrentCodeIn model
@@ -130,9 +138,10 @@ inputElem m =
 codeDecoder: Json.Decoder (Array.Array Code)
 codeDecoder =
     Json.array (
-        Json.map2 Code
+        Json.map3 Code
             (Json.field "codename" Json.string)
             (Json.field "lines" (Json.list Json.string))
+            (Json.field "syntax" Json.string)
     )
 
 
