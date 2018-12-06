@@ -69,7 +69,7 @@ view model =
         , Html.form[] [
           codeField model
         , nameField model
-                  , field []
+        , field []
             [ controlLabel [] [ text "Linguagem"], controlSelect controlSelectModifiers [] [onInput InputCode]
               [ option [] [ text "Elm" ]
               , option [] [ text "Xml" ]
