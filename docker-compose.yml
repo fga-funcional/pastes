@@ -12,8 +12,8 @@ services:
       POSTGRES_PASSWORD: hig
       POSTGRES_DB: hig
 
-  pastes_api:
-    container_name: 'pastes_api'
+  pastes-api:
+    container_name: 'pastes-api'
     build:
       context: ./backend
       dockerfile: ./docker/Dockerfile
@@ -23,9 +23,9 @@ services:
         - db
     ports:
       - 3000:3000
-    command: /root/.local/bin/pastes_api
+    command: /root/.local/bin/pastes-api
 
-  pates:
+  pastes:
     container_name: 'pastes'
     build:
       context: ./frontend
@@ -33,6 +33,6 @@ services:
     volumes:
       - ./frontend/:/pastes/
     depends_on:
-        - pastes_api
+        - pastes-api
     ports:
       - 8000:8000
