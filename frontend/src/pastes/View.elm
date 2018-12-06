@@ -9,13 +9,16 @@ import Http exposing (..)
 import Json.Decode as Json
 import Model exposing (..)
 import Msg exposing (Msg(..))
+import SyntaxHighlight exposing (..)
+
 
 
 view model =
     div []
-        [ textarea [ onKeyDown KeyDown, onInput Input, value model.currentText, class "text-editor" ] []
+        [ h1[][text "Pêistebim" ]
+        , textarea [ onKeyDown KeyDown, onInput Input, value model.currentText, class "text-editor" ] []
         , inputElem model
-        , button [ onClick Add ] [ text "Add" ]
+        , button [ onClick Msg.Add ] [ text "Add" ]
         , showCodes model.savedCodes
         ]
 
@@ -26,10 +29,14 @@ showCodes codes =
 
 
 showCode : Int -> Code -> Html Msg
-showCode idx code =
-    div []
-        [ h3 [] [ text code.codename ]
-        , li [] (List.map (\l -> li [] [ text l ]) code.lines)
+showCode idx codex =
+  div []
+        [  h3[][text codex.codename]
+        , useTheme oneDark 
+        , elm (String.join "\n" codex.lines) 
+            |> Result.map (toBlockHtml (Just 1))
+            |> Result.withDefault
+                (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
         ]
 
 
