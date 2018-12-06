@@ -69,6 +69,12 @@ view model =
         , Html.form[] [
           codeField model
         , nameField model
+                  , field []
+            [ controlSelect controlSelectModifiers [] []
+              [ option [] [ text "Dropdown" ]
+              ]
+            ]
+
         , field []
             [ controlButton { buttonModifiers | color = Link } [] [onClick Msg.Add]
               [ text "Adicionar"]
