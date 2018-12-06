@@ -12,15 +12,49 @@ import Msg exposing (Msg(..))
 import SyntaxHighlight exposing (..)
 
 
+import Bulma.CDN exposing (..)
+import Bulma.Modifiers exposing (..)
+import Bulma.Modifiers.Typography exposing (textCentered)
+import Bulma.Form exposing (..)
+import Bulma.Elements exposing (..)
+import Bulma.Components exposing (..)
+import Bulma.Columns as Columns exposing (..)
+import Bulma.Layout exposing (..)
+
+fontAwesomeCDN
+  = Html.node "link"
+    [ rel "stylesheet"
+    , href "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    ]
+    []
+
+exampleHero : Html Msg
+exampleHero
+  = hero { heroModifiers | color = Info, size = Small} []
+    [ heroBody []
+      [ container []
+        [ Bulma.Elements.title H3 [] [ text "Pêistebim" ]
+        ]
+      ]
+    ]
 
 view model =
-    div []
-        [ h1[][text "Pêistebim" ]
-        , textarea [ onKeyDown KeyDown, onInput Input, value model.currentText, class "text-editor" ] []
+    div[][
+    exampleHero
+    ,container []
+        [ stylesheet
+        , fontAwesomeCDN
+
+        , field []
+            [ controlLabel [] [ text "Código" ], controlTextArea controlTextAreaModifiers [] [ placeholder "Insira o código",class "text-editor", onInput Input, value model.currentText, required True ] []
+            ]
         , inputElem model
-        , button [ onClick Msg.Add ] [ text "Add" ]
+        , field []
+            [ controlButton { buttonModifiers | color = Link } [] [onClick Msg.Add]
+              [ text "Adicionar"]
+              ]
         , showCodes model.savedCodes
-        ]
+        ]]
 
 
 showCodes : Array.Array Code -> Html Msg
@@ -46,12 +80,12 @@ renderList lst =
 
 
 inputElem m =
-    input
-        [ placeholder "Nome do pêiste"
-        , onInput InputName
-        , value m.name
-        ]
-        []
+    field []
+            [ controlLabel [] [ text "Nome" ]
+            , controlInput controlInputModifiers [] [ placeholder "Nome do pêiste", value m.name, onInput InputName ] [] 
+            , controlHelp Default [] [ text "Esse campo é obrigarório!" ]
+            ]
+
 
 
 showTodos m =
