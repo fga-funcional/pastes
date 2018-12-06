@@ -66,12 +66,9 @@ view model =
     ,container []
         [ stylesheet
         , fontAwesomeCDN
-        , Html.form[]
-
-         [field []
-            [ controlLabel [] [ text "Código" , codeError model.codeValidation], controlTextArea controlTextAreaModifiers [] [ placeholder "Insira o código",class "text-editor", onInput Input, value model.currentText] []
-            ]
-        , inputElem model
+        , Html.form[] [
+          codeField model
+        , nameField model
         , field []
             [ controlButton { buttonModifiers | color = Link } [] [onClick Msg.Add]
               [ text "Adicionar"]
@@ -103,8 +100,12 @@ renderList lst =
     ul []
         (List.map (\l -> li [] [ text l ]) lst)
 
+codeField m = 
+    field []
+            [ controlLabel [] [ text "Código" , codeError m.codeValidation], controlTextArea controlTextAreaModifiers [] [ placeholder "Insira o código",class "text-editor", onInput Input, value m.currentText] []
+            ]
 
-inputElem m =
+nameField m =
     field []
             [ controlLabel [] [ text "Nome" , nameError m.nameValidation]
             , controlInput controlInputModifiers [] [ placeholder "Nome do pêiste", value m.name, onInput InputName ] [nameError m.nameValidation ] 
