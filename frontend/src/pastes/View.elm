@@ -38,15 +38,38 @@ exampleHero
       ]
     ]
 
+nameError status =
+    case status of
+        ValidName ->
+           div[][]
+        ShortName ->
+          notification Warning []
+            [ text "Tá de murrinhagem de caracteres é?"
+            ]
+        EmptyName ->
+          notification Danger []
+            [ text "O código deve ter um nome!"
+            ]
+
+codeError status =
+    case status of
+        ValidCode ->
+           div[][]
+        EmptyCode ->
+          notification Warning []
+            [ text "Coda aí vai"
+            ]
+
 view model =
     div[][
     exampleHero
     ,container []
         [ stylesheet
         , fontAwesomeCDN
+        , Html.form[]
 
-        , field []
-            [ controlLabel [] [ text "Código" ], controlTextArea controlTextAreaModifiers [] [ placeholder "Insira o código",class "text-editor", onInput Input, value model.currentText, required True ] []
+         [field []
+            [ controlLabel [] [ text "Código" , codeError model.codeValidation], controlTextArea controlTextAreaModifiers [] [ placeholder "Insira o código",class "text-editor", onInput Input, value model.currentText] []
             ]
         , inputElem model
         , field []
@@ -54,7 +77,9 @@ view model =
               [ text "Adicionar"]
               ]
         , showCodes model.savedCodes
-        ]]
+        ]
+        ]
+        ]
 
 
 showCodes : Array.Array Code -> Html Msg
@@ -81,8 +106,8 @@ renderList lst =
 
 inputElem m =
     field []
-            [ controlLabel [] [ text "Nome" ]
-            , controlInput controlInputModifiers [] [ placeholder "Nome do pêiste", value m.name, onInput InputName ] [] 
+            [ controlLabel [] [ text "Nome" , nameError m.nameValidation]
+            , controlInput controlInputModifiers [] [ placeholder "Nome do pêiste", value m.name, onInput InputName ] [nameError m.nameValidation ] 
             , controlHelp Default [] [ text "Esse campo é obrigarório!" ]
             ]
 

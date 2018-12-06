@@ -1,4 +1,4 @@
-module Model exposing (Code, Model, init)
+module Model exposing (..) 
 
 import Array
 
@@ -13,12 +13,17 @@ type alias Code =
 type alias Model =
     { savedCodes: Array.Array Code
     , currentCode: Code
+    , codeValidation: CodeStatus
     , name: String
+    , nameValidation: NameStatus
     , savedText: String
     , currentText: String
     }
 
+type CodeStatus = EmptyCode | ValidCode 
+type NameStatus = EmptyName | ShortName | ValidName 
 
+ 
 init : Model
 init =
-    ( Model (Array.fromList []) {codename="", lines=[]} "" "" "")
+    ( Model (Array.fromList []) {codename="", lines=[]} EmptyCode "" EmptyName "" "")

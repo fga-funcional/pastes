@@ -36,10 +36,32 @@ type Msg
   | Input String
   | InputName String
   | Add 
-  --| SendHttpRequest
   | GetSavedCodes (Result Http.Error (Array.Array Code))
-  --| DataReceived (Result Http.Error (List String))
 
+validate : (Model, Cmd Msg) -> (Model, Cmd Msg)
+validate (model, cmd) = 
+    let
+        codeStatus =
+            if model.currentText == "" then
+                EmptyCode
+            else
+                ValidCode 
+    
+        nameStatus =
+            if model.name == "" then
+                EmptyName
+            else if String.length model.name < 5 then
+                ShortName 
+            else
+                ValidName
+        ready =
+            (codeStatus == ValidCode)
+                && (nameStatus == ValidName)
+    in
+        ({ model
+            | codeValidation = codeStatus
+            , nameValidation = nameStatus 
+        }, Cmd.none)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -55,10 +77,10 @@ update msg model =
         (model, Cmd.none)
 
     Input text ->
-      ({ model | currentText = text , savedText = text}, Cmd.none)
+      validate ({ model | currentText = text}, Cmd.none)
 
     InputName text ->
-      ({ model | name = text , savedText = text}, Cmd.none)
+      validate ({ model | name = text , savedText = text}, Cmd.none)
 
     Add ->
           let
