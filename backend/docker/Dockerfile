@@ -1,15 +1,26 @@
-FROM haskell
+FROM debian:latest
 
-ADD ./pastebin.cabal /pastebin_api/pastebin.cabal
+# Install dependencies.
+RUN apt-get update && \
+  apt-get install --assume-yes curl gcc libgmp-dev libpq-dev make xz-utils zlib1g-dev
 
-ADD ./stack.yaml /pastebin_api/stack.yaml
+# Install Stack.
+RUN curl --location https://www.stackage.org/stack/linux-x86_64-static > stack.tar.gz && \
+  tar xf stack.tar.gz && \
+  cp stack-*-linux-x86_64-static/stack /usr/local/bin/stack && \
+  rm -f -r stack.tar.gz stack-*-linux-x86_64-static/stack && \
+  stack --version
 
-WORKDIR /pastebin_api
+WORKDIR /home/pastes-api
+COPY stack.yaml /home/pastes-api/
+COPY pastes-api.cabal /home/pastes-api/
 
-RUN stack ghci --install-ghc
+RUN stack setup
 
-ADD ./Main.hs /pastebin_api/Main.hs
+COPY Main.hs home/pastes-api/
 
-RUN ls
+RUN stack --no-system-ghc --install-ghc build --allow-different-user
 
-CMD ./backend/docker/entrypoint.sh
+COPY postgresql/ /home/pastes-api/postgresql
+
+RUN stack install

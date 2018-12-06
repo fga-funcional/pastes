@@ -1,9 +1,9 @@
-name:          pastebin 
-version:       0.0.0
+name:          pastes-api
+version:       0.0.1
 cabal-version: >= 1.8
 build-type:    Simple
 
-executable          pastebin 
+executable          pastes-api
     hs-source-dirs: .
     main-is:        Main.hs
     ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
