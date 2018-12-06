@@ -171,7 +171,7 @@ codesDecoder =
 httpCommand : Cmd Msg
 httpCommand =
     codesDecoder
-        |> Http.get "http://localhost:3000/codes/factorial"
+        |> Http.get "http://localhost:8080/api/codes/factorial"
         |> Http.send DataReceived
 -}
 createCodeCommand : Code -> Cmd Msg
@@ -193,10 +193,10 @@ createCodeRequest code =
 
 createPostUrl : String -> String
 createPostUrl codeName =
-    "http://localhost:3000/code/" ++ codeName
+    "http://localhost:8080/api/codes/" ++ codeName
 getCodes : Http.Request (Array.Array Code)
 getCodes =
-  Http.get "http://localhost:3000/codes" codesDecoder
+  Http.get "http://localhost:8080/api/codes" codesDecoder
 
 init : () -> (Model, Cmd Msg) 
 init _ = (Model.init, Http.send GetSavedCodes getCodes) 
