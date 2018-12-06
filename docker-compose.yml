@@ -1,20 +1,38 @@
 version: '2' 
 
 services:
-  pastebin:
-    build:
-      context: ./frontend
-      dockerfile: ./docker/Dockerfile
-    volumes:
-      - ./:/pastebin
+  db:
+    container_name: 'haskell_image_gallery_db'
+    image: postgres
+    restart: always
     ports:
-      - 8000:8000
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: hig
+      POSTGRES_PASSWORD: hig
+      POSTGRES_DB: hig
 
-  pastebin_api:
+  pastes_api:
+    container_name: 'pastes_api'
     build:
       context: ./backend
       dockerfile: ./docker/Dockerfile
     volumes:
-      - ./backend/:/pastebin_api/
+      - ./backend/:/pastes_api/
+    depends_on:
+        - db
     ports:
       - 3000:3000
+    command: /root/.local/bin/pastes_api
+
+  pates:
+    container_name: 'pastes'
+    build:
+      context: ./frontend
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ./frontend/:/pastes/
+    depends_on:
+        - pastes_api
+    ports:
+      - 8000:8000
