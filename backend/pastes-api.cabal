@@ -14,5 +14,4 @@ executable          pastes-api
                   , http-types
                   , wai-cors
                   , aeson
-                  , mongoDB
                   , text
