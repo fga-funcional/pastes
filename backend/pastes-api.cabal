@@ -14,16 +14,4 @@ executable          pastes-api
                   , http-types
                   , wai-cors
                   , aeson
-                  , mongoDB
                   , text
-                  , postgresql-simple
-                  , postgresql-simple-migration
-                  , aeson
-                  , HTTP
-                  , transformers
-                  , wai
-                  , wai-middleware-static
-                  , wai-extra
-                  , resource-pool
-                  , configurator
-                  , MissingH
