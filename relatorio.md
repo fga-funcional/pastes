@@ -1,17 +1,17 @@
 # Relatório
 
-**Alunos:** João Robson Santos Martins - 15/0154003 /  Arthur Temporim - 
+**Alunos:** João Robson Santos Martins - 15/0154003 /  Arthur Temporim - 14/0016759 
 
 ## Desenvolvimento técnico
 
 ### Mecanismo de persistência
 Foi utilizado escrita em arquivo, mas isso apenas para o objeto já instanciado no código do backend, ou seja, não conseguimos ler do arquivo para apresentar no frontend a partir da requisição GET nem escrever novos objetos a partir do POST.
 
-### Recursos avançados das linguagens
-Foram utilizadas mônadas no trecho do código que utilizado "do-notation" para lidar com o IO.
+## Recursos avançados das linguagens
+Foram utilizadas mônadas no trecho do código que utiliza "do-notation" para lidar com o IO.
 
 ### Rotas, tasks e subscribers
-Não foram utilizados rotas, tasks e subscribers no projeto final. Anteriormente, foi utilizado um listener para eventos do teclado a fim de registrar quando o usuário pressionava "Enter", ou seja, inseria uma quebra de linha, no código do campo de texto. Porém esse problema foi resolvido posteriormente com a property "white-space" do CSS.
+Não foram utilizados rotas, tasks e subscribers no projeto final. Anteriormente, foi utilizado um listener para eventos do teclado a fim de registrar quando o usuário pressionava "Enter", ou seja, inseria uma quebra de linha, no código inserido no campo de texto. Porém, esse problema foi resolvido posteriormente com a property "white-space" do CSS.
 
 ### Union Types
 Foram utilizados Union Types para gerenciar as mensagens do Update e também para realizar as validações dos campos dos formulário utilizado para cadastrar um código, onde cada Union Type representava os possíveis valores para cada campo.
@@ -22,26 +22,27 @@ Foi definido o tipo CCode, que sofre herança de Show e Generic. CCode também �
 ## Qualidade do Produto
 
 ## Implementa recursos básicos esperados além da aparência?
-Sim. No front-end o usuário consegue visualizar a lista de imagens, visualizar a imagem em tela cheia, zoom in, zoom out, arrastar, visualizar em tamanho real ou ajustada e navegar entre as imagens em tela cheia. No back-end a API funciona da forma esperada para as ações básicas (listar, criar, atualizar, obter e apagar imagens).
+Sim. No frontend, o usuário consegue cadastrar um código novo, um nome para esse código e selecionar a linguagem desse código, permitindo o *syntax highlight* adequado. Após o cadastro, ele consegue visualizar a lista de códigos cadastrados.
 
 ## Interações de forma eficiente
-O usuário pode navegar na aplicação através ícones específicos de fácil visualização e também através de vários atalhos de teclado. Na verdade, o usuário consegue realizar todas as ações da aplicação que conseguiri com o mouse através do teclado (menos arrastar a imagem).
+Além de poder realizar a navegação pelo teclado, o usuário consegue cadastrar um código com apenas três passos.
+
 
 ## Conseguiu polir a aplicação?
-Sim, foi tomado o cuidado de adicionar transições on hover, evitar cores que se misturassem com a imagem muito frequentemente, adicionar divs com cores diferentes atrás dos ícones, não permitir arrastar a imagem quando ela estiver em tamanho real ou menor, o zoom in e out possuem limites, não permitir troca de imagem quando não em tela cheia, dentre outros detalhes.
+Sim, foi utilizado a biblioteca Bulma do elm, que permite adicionar componentes de UI já integrados com CSS no projeto. Além disso, validadores para não permitir os campos de texto do código e do seu nome vazios disparam mensagens de aviso com cores fortes, para facilitar o entendimento do usuário.
 
 ## Pronto para produção?
-Quase. O back-end está integrado com o docker mas eu não o colocaria em produção sem autenticação nas rotas e sem definir melhor algumas questões de timeout em requisições e outros mecanismos de proteção. Já o front-end não está integrado com nenhum servidor, mas com relação ao código fonte, ele já poderia ser utilizado normalmente, alterando apenas a rota da qual ela obteria as imagens.
+A integração com o docker ficou quase pronta. Por problemas de compatibilidade de versão entre a imagem disponível e os SO que utilizamos, não conseguimos completar a integração, mas caso conseguíssemos, poderíamos utilizar persistência no banco. O que faltaria seria apenas utilizar autenticação nas rotas e a criação de rotas individuais e níveis de permissão para cada código adicionado.
 
 ## Integração front + back 
 ### Front usa backend como mecanismo de persistência?
 Não. 
 
 ### Conseguiu conectar os dois sistemas adequadamente?
-Sim, as rotas são gerencias pelo backend. Assim, o frontend o acessa por meio de requisições HTTP. Para contornar o problema do CORS, utilizamos o devd, um "servidor local para desenvolvedores", juntamente com o simpleCors
+Sim, as rotas são gerencias pelo backend. Assim, o frontend o acessa por meio de requisições HTTP. Para contornar o problema do CORS, utilizamos o devd, um "servidor local para desenvolvedores", juntamente com o middleware simpleCors do Haskell.
 
 ### Consegue rodar mais de uma instâcia (discriminada por URL, por exemplo)
-Sim, uma vez que o backend está dockerizado, para adicionar instâncias, necessário apenas subir outra instância com host ou porta diferente. Já o front-end não está integrado a um servidor, mas no código fonte também não há nenhum impedimento nesse sentido.
+Não, pois não conseguimos dockerizar a aplicação.
 
 ## Método
 ### Possui sistema de build?
