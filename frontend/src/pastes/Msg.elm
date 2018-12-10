@@ -5,6 +5,7 @@ import Model exposing (..)
 import Http exposing (..)
 import Array
 import Json.Decode as Json
+import Json.Encode as Encode
 import Html.Attributes exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -14,6 +15,9 @@ setCodeName : String -> Code -> Code
 setCodeName newName code = 
   { code | codename = newName}
 
+setCodeSyntax : String -> Code -> Code
+setCodeSyntax newSyntax code = 
+  { code | syntax = newSyntax }
 setCodeLines : List String -> Code -> Code
 setCodeLines newLines code = 
   { code | lines = newLines}
@@ -30,12 +34,18 @@ asCurrentCodeIn : Model -> Code -> Model
 asCurrentCodeIn =
     flip setCurrentCode
 
+emptyCode : Code
+emptyCode = Code "" [] ""
+
 type Msg 
   = NoOp
   | KeyDown Int 
   | Input String
   | InputName String
+  | InputCode String
   | Add 
+  | CodeCreated (Result Http.Error Code)
+  | CreateNewCode
   | GetSavedCodes (Result Http.Error (Array.Array Code))
 
 validate : (Model, Cmd Msg) -> (Model, Cmd Msg)
@@ -82,15 +92,19 @@ update msg model =
     InputName text ->
       validate ({ model | name = text , savedText = text}, Cmd.none)
 
+    InputCode text ->
+      validate ({ model | currentSyntax = text }, Cmd.none)
+
     Add ->
           let
               newModel =
                   model.currentCode
+                      |> setCodeSyntax model.currentSyntax
                       |> setCodeName model.name
                       |> setCodeLines (String.split "\n" model.currentText)
                       |> asCurrentCodeIn model
           in
-              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, Cmd.none)
+              ({model | savedCodes = Array.push newModel.currentCode model.savedCodes, currentText = "", name = ""}, createCodeCommand model.currentCode)
         {-
         ({ model | newCode.name = name, newCode.lines = (String.split "\n" model.currentText), currentText = ""
         }, Cmd.none)
@@ -119,6 +133,16 @@ update msg model =
             Ok codes->
                 ( { model | savedCodes = codes }, Cmd.none )
 
+    CodeCreated (Ok code) ->
+            ({ model | savedCodes = Array.push model.currentCode model.savedCodes, currentCode =emptyCode 
+              }, Cmd.none )
+
+    CodeCreated (Err _) ->
+      (model, Cmd.none)
+
+    CreateNewCode ->
+      ( model, createCodeCommand model.currentCode )
+
 inputElem m =
     input
         [ placeholder "Nome do pêiste"
@@ -127,28 +151,52 @@ inputElem m =
         ]
         []
 
-codeDecoder: Json.Decoder (Array.Array Code)
+codeDecoder: Json.Decoder Code 
 codeDecoder =
-    Json.array (
-        Json.map2 Code
+        Json.map3 Code
             (Json.field "codename" Json.string)
             (Json.field "lines" (Json.list Json.string))
-    )
+            (Json.field "syntax" Json.string)
 
 
-codesDecoder : Json.Decoder (List String)
+codesDecoder : Json.Decoder (Array.Array Code)
 codesDecoder =
-    Json.list Json.string
+    Json.array (
+        Json.map3 Code
+            (Json.field "codename" Json.string)
+            (Json.field "lines" (Json.list Json.string))
+            (Json.field "syntax" Json.string)
+    )
 {-
 httpCommand : Cmd Msg
 httpCommand =
     codesDecoder
-        |> Http.get "http://localhost:3000/codes/factorial"
+        |> Http.get "http://localhost:8080/api/codes/factorial"
         |> Http.send DataReceived
 -}
+createCodeCommand : Code -> Cmd Msg
+createCodeCommand code =
+      createCodeRequest code 
+        |> Http.send CodeCreated
+
+codeEncoder : Code -> Encode.Value       
+codeEncoder code =
+   Encode.object
+        [ ( "codename", Encode.string code.codename)
+        , ( "lines", (Encode.list Encode.string) code.lines)
+        , ( "syntax", Encode.string code.syntax)
+        ]
+
+createCodeRequest : Code -> Http.Request Code 
+createCodeRequest code =
+    Http.post (createPostUrl code.codename) (Http.jsonBody (codeEncoder code)) codeDecoder
+
+createPostUrl : String -> String
+createPostUrl codeName =
+    "http://localhost:8080/api/codes/" ++ codeName
 getCodes : Http.Request (Array.Array Code)
 getCodes =
-  Http.get "http://localhost:3000/codes" codeDecoder
+  Http.get "http://localhost:8080/api/codes" codesDecoder
 
 init : () -> (Model, Cmd Msg) 
 init _ = (Model.init, Http.send GetSavedCodes getCodes) 

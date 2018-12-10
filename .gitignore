@@ -1,7 +1,10 @@
 # Frontend
 # elm-package generated files
 elm-stuff
+frontend/main.js
+
 # elm-repl generated files
 repl-temp-*
 # Backend
 backend/.stack-work/
+backend/myfile.json

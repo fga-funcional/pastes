@@ -1,5 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+
+import GHC.Generics
+import Data.Text.Lazy.IO as I
+import Data.Aeson.Text (encodeToLazyText)
+
 
 
 import Web.Scotty
@@ -11,8 +17,9 @@ import Control.Monad.IO.Class
 import Network.Wai.Middleware.Cors
 import GHC.Generics
 import Data.Aeson (FromJSON, ToJSON)
-instance ToJSON CCode 
-instance FromJSON CCode
+
+
+
 
 
 type Name = String
@@ -21,12 +28,15 @@ type Code = String
 
 data CCode = CCode
   { codename :: String,
-    lines :: [String]
+    lines :: [String],
+    syntax :: String
   } deriving (Show, Generic)
+instance ToJSON CCode 
+instance FromJSON CCode
 
 allcodes = 
-  [ CCode "factorial" [ "def fat(n):" , "if n == 1:" , "return 1" , "return n * fat(n - 1)" ]
-    ,CCode "hello world" [ "print(hello world)" ]
+  [ CCode "factorial" [ "def fat(n):" , "if n == 1:" , "return 1" , "return n * fat(n - 1)" ] "Python"
+    ,CCode "hello world" [ "print(hello world)" ] "Python"
   ] 
 allCodes :: M.Map Name [Code]
 allCodes = M.fromList
@@ -49,6 +59,7 @@ validateCodes codes = length codes == 6
 main :: IO ()
 main = do
     codes' <- newMVar allCodes
+    I.writeFile "myfile.json" (encodeToLazyText allcodes)
 
     scotty 3000 $ do
         middleware simpleCors
@@ -66,20 +77,9 @@ main = do
             json $ M.lookup name codes
 
         -- Cadastra novas tarefas no dia especificado.
-        post "/codes/:name" $ do
-            name <- param "name"
-            newCodes <- jsonData
-            if not (validateName name && validateCodes newCodes)
-               then status status400
-               else do
-                   created <- liftIO $ modifyMVar codes' $ \codes ->
-                       if M.member name codes
-                          then return (codes, False) 
-                          else return (M.insert name newCodes codes, True) 
-                   if created
-                      then status status200
-                      else status status403
-
+        post "/codes" $ do
+            newCodes <- jsonData :: ActionM CCode 
+            json newCodes
         -- Atualiza a lista de tarefas do dia especificado.
         put "/codes/:name" $ do
             name <- param "name"

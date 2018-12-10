@@ -62,13 +62,23 @@ codeError status =
 
 view model =
     div[][
-    exampleHero
+     exampleHero
     ,container []
         [ stylesheet
         , fontAwesomeCDN
         , Html.form[] [
           codeField model
         , nameField model
+        , field []
+            [ controlLabel [] [ text "Linguagem"], controlSelect controlSelectModifiers [] [onInput InputCode]
+              [ option [] [ text "Elm" ]
+              , option [] [ text "Xml" ]
+              , option [] [ text "Javascript" ]
+              , option [] [ text "CSS" ]
+              , option [] [ text "Python" ]
+              ]
+            ]
+
         , field []
             [ controlButton { buttonModifiers | color = Link } [] [onClick Msg.Add]
               [ text "Adicionar"]
@@ -86,15 +96,54 @@ showCodes codes =
 
 showCode : Int -> Code -> Html Msg
 showCode idx codex =
-  div []
-        [  h3[][text codex.codename]
-        , useTheme oneDark 
-        , elm (String.join "\n" codex.lines) 
-            |> Result.map (toBlockHtml (Just 1))
-            |> Result.withDefault
-                (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
-        ]
-
+  case codex.syntax of 
+   "Elm" ->
+      div []
+            [  h3[][text codex.codename]
+            , useTheme oneDark 
+            , elm (String.join "\n" codex.lines) 
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
+            ]
+   "Python" ->
+      div []
+            [  h3[][text codex.codename]
+            , useTheme oneDark 
+            , python (String.join "\n" codex.lines) 
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
+            ]
+   "Javascript" ->
+      div []
+            [  h3[][text codex.codename]
+            , useTheme oneDark 
+            , javascript (String.join "\n" codex.lines) 
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
+            ]
+   "XML" ->
+      div []
+            [  h3[][text codex.codename]
+            , useTheme oneDark 
+            , xml (String.join "\n" codex.lines) 
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
+            ]
+   "CSS" ->
+      div []
+            [  h3[][text codex.codename]
+            , useTheme oneDark 
+            , css (String.join "\n" codex.lines) 
+                |> Result.map (toBlockHtml (Just 1))
+                |> Result.withDefault
+                    (pre [] [ code [] [ text (String.join "\n" codex.lines)]])
+            ]
+   _ ->
+     div[][]
 
 renderList lst =
     ul []
